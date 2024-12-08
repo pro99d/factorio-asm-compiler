@@ -14,15 +14,13 @@ INSTRUCTIONS = {
     "ror":"i18",
     "nop":"i0",
     "in":"r1",
-    "out":"r2"
+    "out":"r2",
+    "result":"r3"
 }
-REP = {
-    r"mov *(\d+) r(\d+)":r"sub d\1 m\2"
-}
+
+REP = {}
 """
-sav *2 r1 # задать регистру 1 значение 2
-sav r1 r2 # задать регистру 2 значение регистра 1
-* - число
+
 r - регистр
 result - результат предыдущей операции
 r1 - ввод, только чтение
@@ -34,5 +32,28 @@ def to_machine_code(file):
     with open(file, "r") as asm:
         for line in asm.readlines():
             lines.append(line.split(" "))
+    for line in range(len(lines)):
+        if lines[line-1][0].startswith("$"):
+            name = lines[line][0][1:]
+            INSTRUCTIONS[name] = lines[line][1]
+            lines.pop(line-1)
+        for ins in range(len(lines[line-1])):
+            print()
+            g = lines[line-1][ins-1]
+            print(g)
+            if "\n" in g:
+                g = g[0:-1]
+                if g in INSTRUCTIONS:
+                    lines[line][ins] = INSTRUCTIONS[g]+"\n"
+
+            if g in INSTRUCTIONS:
+                lines[line][ins] = INSTRUCTIONS[g]
+    #for ine in lines:
+
+    with open(file+"mc", "w") as mc:
+        for line in lines:
+            mc.write("".join(line))
+
+
     print(lines)
 to_machine_code("test.asm")
